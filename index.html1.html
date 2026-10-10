@@ -1,0 +1,579 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#6C47FF">
+<title>Prof Nounou</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<style>
+:root{
+  --violet:#6C47FF; --blue:#2F80ED; --ink:#1B1740; --mut:#6B6890; --bg:#F7F6FF; --card:#fff; --line:#E7E4F7;
+  --grad:linear-gradient(135deg,#6C47FF,#2F80ED); --r:18px;
+  font-family:'Outfit',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-size:16px;line-height:1.5;-webkit-tap-highlight-color:transparent}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none}
+:focus-visible{outline:3px solid #A895FF;outline-offset:2px}
+[hidden]{display:none!important}
+#app{max-width:880px;margin:0 auto;min-height:100%;display:flex;flex-direction:column}
+.top{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;padding:12px 18px;padding-top:calc(12px + env(safe-area-inset-top,0px));background:rgba(247,246,255,.92);backdrop-filter:blur(10px)}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:20px;letter-spacing:-.02em}
+.logo{width:38px;height:38px;border-radius:12px;background:var(--grad);display:grid;place-items:center;color:#fff}
+.menu{position:absolute;right:18px;top:60px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:6px;min-width:190px;box-shadow:0 12px 32px rgba(40,20,120,.14)}
+.menu button{display:flex;gap:10px;align-items:center;width:100%;padding:11px 12px;border-radius:10px;text-align:left}
+.menu button:hover{background:var(--bg)}
+main{flex:1;padding:6px 18px 96px}
+main.chatmode{padding:0;display:flex;flex-direction:column;min-height:0}
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:20;background:#fff;border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
+.tabs div{max-width:880px;margin:0 auto;display:flex}
+.tabs button{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px 0 8px;color:var(--mut);font-size:12px;font-weight:500}
+.tabs button.on{color:var(--violet)}
+h1{font-size:28px;line-height:1.15;letter-spacing:-.02em;font-weight:700}
+h2{font-size:20px;letter-spacing:-.01em;font-weight:600}
+.sub{color:var(--mut)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:16px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:13px 20px;border-radius:14px;font-weight:600;background:var(--grad);color:#fff;transition:transform .12s}
+.btn:active{transform:scale(.98)}
+.btn.ghost{background:#fff;color:var(--violet);border:1px solid var(--line)}
+.btn.full{width:100%}
+.btn[disabled]{opacity:.6}
+label{display:block;font-weight:500;font-size:14px;margin:14px 0 6px}
+input,select,textarea{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:#fff}
+textarea{min-height:130px;resize:vertical}
+input[type=file]{padding:10px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.hint{font-size:13px;color:var(--mut);margin-top:5px}
+.err{background:#FFF0F0;color:#B42318;border-radius:12px;padding:10px 14px;margin-top:14px;font-size:14px}
+.ok{background:#EEF6FF;color:#175CD3;border-radius:12px;padding:10px 14px;margin-top:14px;font-size:14px}
+.auth{padding:28px 18px 40px}
+.auth .hero{display:flex;flex-direction:column;gap:12px;margin:10px 0 22px}
+.seg{display:flex;background:#fff;border:1px solid var(--line);border-radius:14px;padding:4px;gap:4px}
+.seg button{flex:1;padding:10px;border-radius:10px;font-weight:600;color:var(--mut)}
+.seg button.on{background:var(--grad);color:#fff}
+.types{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.type{border:2px solid var(--line);background:#fff;border-radius:var(--r);padding:16px;text-align:left;display:flex;flex-direction:column;gap:6px}
+.type.on{border-color:var(--violet);background:#F4F1FF}
+.type b{font-size:17px}
+.type span{font-size:13px;color:var(--mut)}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:#fff;font-weight:500;font-size:14px;white-space:nowrap}
+.chip.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:12px 0;scrollbar-width:none}
+.badge{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;padding:4px 10px 4px 8px;border-radius:999px}
+.badge.prof{background:#E8F1FF;color:#1D63D0}
+.badge.nounou{background:#EFEAFF;color:#5530E0}
+.badge.client{background:#F0EFF7;color:var(--mut)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px;margin-top:6px}
+.seller{display:flex;flex-direction:column;gap:10px;text-align:left;width:100%;transition:border-color .15s}
+.seller:hover{border-color:#B9A9FF}
+.seller .head{display:flex;gap:12px;align-items:center}
+.seller .name{font-weight:600}
+.meta{display:flex;align-items:center;gap:5px;color:var(--mut);font-size:14px}
+.av{border-radius:50%;object-fit:cover;flex:none;background:#EEE}
+.av.ph{display:grid;place-items:center;background:var(--grad);color:#fff;font-weight:700}
+.empty{text-align:center;color:var(--mut);padding:44px 10px}
+.back{display:inline-flex;gap:6px;align-items:center;color:var(--mut);font-weight:500;padding:8px 0}
+.prof-head{display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;padding:10px 0 6px}
+.cvbox{white-space:pre-wrap;line-height:1.6}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0}
+.actions .btn{flex:1}
+.list{display:flex;flex-direction:column;gap:10px;margin-top:10px}
+.conv{display:flex;gap:12px;align-items:center;text-align:left;width:100%}
+.chathead{display:flex;align-items:center;gap:10px;padding:8px 14px;background:#fff;border-bottom:1px solid var(--line)}
+.chathead .t{flex:1;font-weight:600;min-width:0}
+.icobtn{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;background:var(--bg);color:var(--violet)}
+.msgs{flex:1;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:8px;height:calc(100dvh - 130px)}
+.b{max-width:78%;padding:10px 14px;border-radius:18px;background:#fff;border:1px solid var(--line);word-wrap:break-word;white-space:pre-wrap}
+.b.me{align-self:flex-end;background:var(--grad);color:#fff;border:0}
+.b small{display:block;font-size:11px;opacity:.65;margin-top:2px}
+.b.call{display:flex;flex-direction:column;gap:8px;white-space:normal}
+.b.call .btn{padding:9px 14px;font-size:14px;background:#fff;color:var(--violet)}
+.composer{display:flex;gap:8px;padding:10px 14px;padding-bottom:calc(10px + env(safe-area-inset-bottom,0px));background:#fff;border-top:1px solid var(--line)}
+.composer input{border-radius:999px}
+.send{width:46px;height:46px;border-radius:50%;background:var(--grad);color:#fff;display:grid;place-items:center;flex:none}
+.preview{display:flex;align-items:center;gap:12px;margin-top:6px}
+.crow{display:flex;gap:8px;align-items:center;width:100%}
+.b.mediab{padding:6px;background:#fff}
+.b.mediab.me{background:var(--grad)}
+.media{display:block;max-width:100%;width:260px;border-radius:12px;background:#EEE;min-height:60px}
+.b audio{width:230px;max-width:100%;height:42px}
+.b.mediab small{padding:0 6px 2px}
+.dot{width:12px;height:12px;border-radius:50%;background:#E5322D;animation:pulse 1s infinite}
+@keyframes pulse{50%{opacity:.3}}
+.toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 18px;border-radius:999px;font-size:14px;z-index:50}
+.setup{padding:30px 20px}
+.setup code{background:#fff;border:1px solid var(--line);padding:2px 6px;border-radius:6px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+/* ============ CONFIGURATION SUPABASE ============ */
+const SUPABASE_URL = 'https://bxjqsfftpypxfltbqnnv.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_wR1YOIlpMTMZg80lie-7RA_NBCsB5U_';
+/* ================================================== */
+
+const COUNTRIES = ['Sénégal',"Côte d'Ivoire",'Mali','Burkina Faso','Bénin','Togo','Guinée','Niger','Mauritanie','Cameroun','Gabon','Congo','RD Congo','Tchad','Madagascar','Maroc','Algérie','Tunisie','France','Belgique','Suisse','Canada','Autre'];
+
+const P = {
+  cap:'<path d="M2 9l10-5 10 5-10 5z"/><path d="M6 11.5V16c0 1.5 3 3 6 3s6-1.5 6-3v-4.5"/><path d="M22 9v6"/>',
+  nanny:'<circle cx="12" cy="6.5" r="3.2"/><path d="M5 21v-2.2A5 5 0 0 1 10 14h4a5 5 0 0 1 5 4.8V21"/><path d="M12 19.2s-2.6-1.5-2.6-3.1a1.5 1.5 0 0 1 2.6-.9 1.5 1.5 0 0 1 2.6.9c0 1.6-2.6 3.1-2.6 3.1z"/>',
+  search:'<circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/>',
+  chat:'<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.6A8 8 0 1 1 21 12z"/>',
+  user:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+  video:'<rect x="2.5" y="6" width="13" height="12" rx="3"/><path d="M15.5 10.5l6-3.5v10l-6-3.5z"/>',
+  send:'<path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4z"/>',
+  out:'<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/>',
+  back:'<path d="M15 18l-6-6 6-6"/>',
+  pin:'<path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>',
+  file:'<path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/>',
+  cam:'<path d="M4 8h3l2-3h6l2 3h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.5"/>',
+  clip:'<path d="M21 11.5l-8.6 8.6a5.5 5.5 0 0 1-7.8-7.8l8.6-8.6a3.7 3.7 0 0 1 5.2 5.2l-8.6 8.6a1.8 1.8 0 0 1-2.6-2.6l7.9-7.9"/>',
+  mic:'<rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/>'
+};
+const ic = (n, s = 22) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${P[n]}</svg>`;
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const $ = s => document.querySelector(s);
+const app = $('#app');
+const ROLE_LABEL = { prof: 'Professeur', nounou: 'Nounou', client: 'Client' };
+
+let sb = null;
+const S = { session: null, me: null, tab: 'home', auth: 'login', completing: false, sellers: [], f: { q: '', role: 'all', country: '' }, sel: null, conv: null, other: null, msgs: [], channel: null, su: { type: 'client', sub: 'prof' } };
+
+/* ---------- utilitaires ---------- */
+function toast(t) { const d = document.createElement('div'); d.className = 'toast'; d.textContent = t; document.body.appendChild(d); setTimeout(() => d.remove(), 2600); }
+function badge(r) { return `<span class="badge ${r}">${r === 'prof' ? ic('cap', 14) : r === 'nounou' ? ic('nanny', 14) : ic('user', 14)}${ROLE_LABEL[r]}</span>`; }
+function avatar(p, size = 48) {
+  if (p && p.photo_url) return `<img class="av" style="width:${size}px;height:${size}px" src="${esc(p.photo_url)}" alt="">`;
+  const n = p && p.full_name ? p.full_name[0].toUpperCase() : '';
+  return `<div class="av ph" style="width:${size}px;height:${size}px">${n || ic('user', size * .5)}</div>`;
+}
+function countryOptions(sel) { return `<option value="">Choisir…</option>` + COUNTRIES.map(c => `<option ${c === sel ? 'selected' : ''}>${esc(c)}</option>`).join(''); }
+async function upload(bucket, file, uid, ext) {
+  const path = `${uid}/${bucket === 'cvs' ? 'cv' : 'photo'}-${Date.now()}.${ext}`;
+  const { error } = await sb.storage.from(bucket).upload(path, file, { upsert: false, contentType: file.type || (bucket === 'cvs' ? 'application/pdf' : 'image/jpeg') });
+  if (error) {
+    const hint = /bucket not found/i.test(error.message) ? " (le stockage n'est pas configuré : lancez supabase-setup.sql)"
+      : /row-level security|policy|not authorized|unauthorized/i.test(error.message) ? " (droits manquants : relancez supabase-setup.sql)" : '';
+    throw new Error((bucket === 'cvs' ? "Envoi du CV impossible : " : "Envoi de la photo impossible : ") + error.message + hint);
+  }
+  return path;
+}
+const extOf = f => (f.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '');
+function fmtTime(d) { return new Date(d).toLocaleTimeString('fr', { hour: '2-digit', minute: '2-digit' }); }
+
+/* ---------- démarrage ---------- */
+async function init() {
+  if (SUPABASE_URL.includes('VOTRE') || SUPABASE_ANON_KEY.includes('VOTRE')) {
+    app.innerHTML = `<div class="setup"><h1>Connexion Supabase à configurer</h1><p class="sub" style="margin-top:10px">Ouvrez <code>index.html</code>, puis remplacez <code>SUPABASE_URL</code> et <code>SUPABASE_ANON_KEY</code> en haut du script par les valeurs de votre projet (Supabase &gt; Project Settings &gt; API).</p></div>`;
+    return;
+  }
+  sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  sb.auth.onAuthStateChange((ev) => { if (ev === 'SIGNED_OUT') { S.session = null; S.me = null; leaveChat(); S.auth = 'login'; render(); } });
+  const { data } = await sb.auth.getSession();
+  S.session = data.session;
+  if (S.session) await loadMe();
+  render();
+}
+async function loadMe() {
+  const { data } = await sb.from('profiles').select('*').eq('id', S.session.user.id).maybeSingle();
+  S.me = data;
+  if (!S.me) { S.completing = true; S.auth = 'signup'; return; }
+  S.completing = false;
+  S.tab = S.me.role === 'client' ? 'home' : 'msgs';
+}
+
+/* ---------- rendu principal ---------- */
+function render() {
+  if (!S.me) return renderAuth();
+  const me = S.me, client = me.role === 'client';
+  const tabs = client ? [['home', 'search', 'Découvrir'], ['msgs', 'chat', 'Messages'], ['me', 'user', 'Profil']] : [['msgs', 'chat', 'Messages'], ['me', 'user', 'Profil']];
+  const chat = S.tab === 'msgs' && S.conv;
+  app.innerHTML = `
+    <header class="top">
+      <div class="brand"><div class="logo">${ic('cap', 20)}</div>Prof Nounou</div>
+      <button onclick="toggleMenu()" aria-label="Menu du profil">${avatar(me, 38)}</button>
+      <div class="menu" id="menu" hidden>
+        <button onclick="goTab('me')">${ic('user', 18)} Mon profil</button>
+        <button onclick="logout()">${ic('out', 18)} Se déconnecter</button>
+      </div>
+    </header>
+    <main class="${chat ? 'chatmode' : ''}" id="main"></main>
+    ${chat ? '' : `<nav class="tabs"><div>${tabs.map(t => `<button class="${S.tab === t[0] ? 'on' : ''}" onclick="goTab('${t[0]}')">${ic(t[1])}${t[2]}</button>`).join('')}</div></nav>`}`;
+  if (S.tab === 'home' && client) S.sel ? viewSeller() : viewHome();
+  else if (S.tab === 'msgs') S.conv ? viewChat() : viewConvs();
+  else viewMe();
+}
+function toggleMenu() { const m = $('#menu'); m.hidden = !m.hidden; }
+function goTab(t) { if (t !== 'msgs') leaveChat(); S.tab = t; S.sel = null; render(); window.scrollTo(0, 0); }
+async function logout() { await sb.auth.signOut(); }
+
+/* ---------- authentification ---------- */
+function renderAuth() {
+  app.innerHTML = `<div class="auth">
+    <div class="brand"><div class="logo">${ic('cap', 20)}</div>Prof Nounou</div>
+    <div class="hero"><h1>${S.auth === 'login' ? 'Trouvez le bon prof ou la bonne nounou' : S.completing ? 'Terminez votre inscription' : 'Créez votre compte'}</h1>
+    <p class="sub">${S.auth === 'login' ? 'Connectez-vous pour discuter et organiser un appel vidéo.' : 'Quelques informations suffisent pour commencer.'}</p></div>
+    ${S.completing ? '' : `<div class="seg" style="margin-bottom:8px"><button class="${S.auth === 'login' ? 'on' : ''}" onclick="S.auth='login';renderAuth()">Connexion</button><button class="${S.auth === 'signup' ? 'on' : ''}" onclick="S.auth='signup';renderAuth()">Inscription</button></div>`}
+    <div id="authbox"></div></div>`;
+  S.auth === 'login' ? loginForm() : signupForm();
+}
+function loginForm() {
+  $('#authbox').innerHTML = `
+    <label for="le">E-mail</label><input id="le" type="email" autocomplete="email">
+    <label for="lp">Mot de passe</label><input id="lp" type="password" autocomplete="current-password">
+    <div id="msg"></div>
+    <button class="btn full" style="margin-top:18px" id="lb" onclick="doLogin()">Se connecter</button>`;
+}
+async function doLogin() {
+  const b = $('#lb'); b.disabled = true;
+  const { data, error } = await sb.auth.signInWithPassword({ email: $('#le').value.trim(), password: $('#lp').value });
+  if (error) { $('#msg').innerHTML = `<div class="err">E-mail ou mot de passe incorrect.</div>`; b.disabled = false; return; }
+  S.session = data.session; await loadMe(); render();
+}
+
+function signupForm() {
+  const done = S.completing;
+  $('#authbox').innerHTML = `
+    <p style="font-weight:600;margin:10px 0">Vous êtes…</p>
+    <div class="types">
+      <button type="button" class="type on" id="tc" onclick="setType('client')">${ic('user', 26)}<b>Client</b><span>Je cherche un prof ou une nounou</span></button>
+      <button type="button" class="type" id="tv" onclick="setType('seller')"><span style="display:flex;gap:6px;color:var(--violet)">${ic('cap', 26)}${ic('nanny', 26)}</span><b>Vendeur</b><span>Je propose mes services</span></button>
+    </div>
+    <div id="subwrap" hidden style="margin-top:12px"><div class="seg">
+      <button type="button" id="sp" class="on" onclick="setSub('prof')">Professeur</button>
+      <button type="button" id="sn" onclick="setSub('nounou')">Nounou</button></div></div>
+
+    <label for="sname">Nom complet</label><input id="sname" autocomplete="name">
+    ${done ? '' : `<label for="se">E-mail</label><input id="se" type="email" autocomplete="email">
+    <label for="sp1">Mot de passe</label><input id="sp1" type="password" autocomplete="new-password"><div class="hint">6 caractères minimum</div>`}
+    <div class="row2"><div><label for="sc">Pays</label><select id="sc">${countryOptions('')}</select></div>
+    <div><label for="sv">Ville</label><input id="sv"></div></div>
+    <div id="fprof" hidden><label for="ssub">Matière enseignée</label><input id="ssub" placeholder="Ex. Mathématiques, Anglais…"></div>
+    <div id="fnounou" hidden><label for="squal">Vos qualités</label><input id="squal" placeholder="Ex. patiente, douce, ponctuelle…"></div>
+    <div id="fcv" hidden>
+      <label for="scv">Votre CV détaillé</label>
+      <textarea id="scv" placeholder="Diplômes, expérience, matières, niveaux enseignés…"></textarea>
+      <div class="hint">Obligatoire pour les professeurs : 80 caractères minimum.</div>
+      <label for="scvf">CV en PDF (facultatif)</label><input id="scvf" type="file" accept="application/pdf">
+    </div>
+    <label for="sph">Photo de profil</label>
+    <div class="preview"><div id="pv">${avatar(null, 56)}</div><input id="sph" type="file" accept="image/*" onchange="prevPhoto(this)"></div>
+    <div id="msg"></div>
+    <button class="btn full" style="margin-top:20px" id="sb" onclick="doSignup()">${done ? 'Terminer' : 'Créer mon compte'}</button>`;
+  setType(S.su.type); setSub(S.su.sub);
+}
+function setType(t) {
+  S.su.type = t;
+  $('#tc').classList.toggle('on', t === 'client'); $('#tv').classList.toggle('on', t === 'seller');
+  $('#subwrap').hidden = t === 'client';
+  setSub(S.su.sub);
+}
+function setSub(s) {
+  S.su.sub = s;
+  $('#sp').classList.toggle('on', s === 'prof'); $('#sn').classList.toggle('on', s === 'nounou');
+  const seller = S.su.type === 'seller';
+  $('#fprof').hidden = !(seller && s === 'prof'); $('#fnounou').hidden = !(seller && s === 'nounou'); $('#fcv').hidden = !(seller && s === 'prof');
+}
+function prevPhoto(inp) {
+  const f = inp.files[0]; if (!f) return;
+  $('#pv').innerHTML = `<img class="av" style="width:56px;height:56px" src="${URL.createObjectURL(f)}" alt="">`;
+}
+async function doSignup() {
+  const msg = $('#msg'), btn = $('#sb');
+  const role = S.su.type === 'client' ? 'client' : S.su.sub;
+  const v = id => ($('#' + id)?.value || '').trim();
+  const photo = $('#sph').files[0], cvf = $('#scvf').files[0];
+  const fail = t => { msg.innerHTML = `<div class="err">${esc(t)}</div>`; btn.disabled = false; };
+  btn.disabled = true; msg.innerHTML = '';
+  if (!v('sname')) return fail('Entrez votre nom complet.');
+  if (!S.completing) {
+    if (!/^\S+@\S+\.\S+$/.test(v('se'))) return fail('Entrez une adresse e-mail valide.');
+    if ($('#sp1').value.length < 6) return fail('Le mot de passe doit contenir au moins 6 caractères.');
+  }
+  if (!v('sc')) return fail('Choisissez votre pays.');
+  if (!v('sv')) return fail('Entrez votre ville.');
+  if (role === 'prof' && !v('ssub')) return fail('Indiquez la matière que vous enseignez.');
+  if (role === 'nounou' && !v('squal')) return fail('Indiquez vos qualités.');
+  if (role === 'prof' && v('scv').length < 80) return fail('Un professeur doit détailler son CV (80 caractères minimum).');
+  if (!photo) return fail('Ajoutez une photo de profil.');
+  if (photo.size > 5 * 1024 * 1024) return fail('La photo ne doit pas dépasser 5 Mo.');
+  if (cvf && cvf.size > 10 * 1024 * 1024) return fail('Le PDF ne doit pas dépasser 10 Mo.');
+  try {
+    if (!S.completing) {
+      const { data, error } = await sb.auth.signUp({ email: v('se'), password: $('#sp1').value });
+      if (error) throw error;
+      if (!data.session) { msg.innerHTML = `<div class="ok">Compte créé. Confirmez votre e-mail, puis connectez-vous pour terminer votre inscription.</div>`; btn.disabled = false; return; }
+      S.session = data.session; S.completing = true;
+    }
+    const uid = S.session.user.id;
+    const pPath = await upload('avatars', photo, uid, extOf(photo));
+    const photo_url = sb.storage.from('avatars').getPublicUrl(pPath).data.publicUrl;
+    const cv_path = (cvf && role === 'prof') ? await upload('cvs', cvf, uid, 'pdf') : null;
+    const row = { id: uid, role, full_name: v('sname'), country: v('sc'), city: v('sv'), subject: role === 'prof' ? v('ssub') : null, qualities: role === 'nounou' ? v('squal') : null, cv_text: role === 'prof' ? v('scv') : null, cv_path, photo_url };
+    const { error: e2 } = await sb.from('profiles').insert(row);
+    if (e2) throw e2;
+    await loadMe(); render(); toast('Bienvenue !');
+  } catch (e) {
+    const t = /already registered|already exists/i.test(e.message || '') ? 'Cette adresse e-mail est déjà utilisée.' : 'Inscription impossible : ' + (e.message || 'erreur inconnue');
+    fail(t);
+  }
+}
+
+/* ---------- client : découvrir ---------- */
+async function viewHome() {
+  $('#main').innerHTML = `
+    <h1 style="margin-top:6px">Découvrir</h1>
+    <p class="sub">Des profs et des nounous près de chez vous.</p>
+    <input id="q" placeholder="Matière, ville, nom…" style="margin-top:14px" oninput="S.f.q=this.value;drawList()" value="${esc(S.f.q)}">
+    <div class="chips">
+      ${[['all', 'Tous'], ['prof', 'Profs'], ['nounou', 'Nounous']].map(([k, l]) => `<button class="chip ${S.f.role === k ? 'on' : ''}" onclick="S.f.role='${k}';viewHome()">${k === 'prof' ? ic('cap', 16) : k === 'nounou' ? ic('nanny', 16) : ''}${l}</button>`).join('')}
+    </div>
+    <select id="fc" onchange="S.f.country=this.value;drawList()" aria-label="Pays"><option value="">Tous les pays</option>${COUNTRIES.map(c => `<option ${S.f.country === c ? 'selected' : ''}>${esc(c)}</option>`).join('')}</select>
+    <div class="grid" id="list" style="margin-top:14px"><div class="empty">Chargement…</div></div>`;
+  const { data, error } = await sb.from('profiles').select('*').in('role', ['prof', 'nounou']).order('created_at', { ascending: false });
+  S.sellers = error ? [] : data;
+  drawList();
+}
+function drawList() {
+  const el = $('#list'); if (!el) return;
+  const q = S.f.q.toLowerCase();
+  let l = S.sellers.filter(s => (S.f.role === 'all' || s.role === S.f.role) && (!S.f.country || s.country === S.f.country) &&
+    (!q || [s.full_name, s.city, s.country, s.subject, s.qualities].join(' ').toLowerCase().includes(q)));
+  l.sort((a, b) => (b.country === S.me.country) - (a.country === S.me.country));
+  el.innerHTML = l.length ? l.map(s => `
+    <button class="card seller" onclick="openSeller('${s.id}')">
+      <div class="head">${avatar(s, 52)}<div><div class="name">${esc(s.full_name)}</div>${badge(s.role)}</div></div>
+      <div class="meta">${ic('pin', 16)}${esc(s.city)}, ${esc(s.country)}</div>
+      <div>${esc(s.role === 'prof' ? s.subject : s.qualities)}</div>
+    </button>`).join('') : `<div class="empty" style="grid-column:1/-1">Aucun profil trouvé. Essayez d'autres filtres.</div>`;
+}
+function openSeller(id) { S.sel = S.sellers.find(s => s.id === id); render(); window.scrollTo(0, 0); }
+function viewSeller() {
+  const s = S.sel;
+  $('#main').innerHTML = `
+    <button class="back" onclick="S.sel=null;render()">${ic('back', 18)} Retour</button>
+    <div class="prof-head">${avatar(s, 96)}<h1>${esc(s.full_name)}</h1>${badge(s.role)}
+      <div class="meta">${ic('pin', 16)}${esc(s.city)}, ${esc(s.country)}</div></div>
+    <div class="actions">
+      <button class="btn" onclick="chatWith('${s.id}',false)">${ic('chat', 18)} Écrire</button>
+      <button class="btn ghost" onclick="chatWith('${s.id}',true)">${ic('video', 18)} Appel vidéo</button>
+    </div>
+    <div class="card"><h2>${s.role === 'prof' ? 'Matière' : 'Qualités'}</h2><p style="margin-top:6px">${esc(s.role === 'prof' ? s.subject : s.qualities)}</p></div>
+    ${(s.cv_text || s.cv_path) ? `<div class="card" style="margin-top:12px"><h2>CV</h2>${s.cv_text ? `<p class="cvbox" style="margin-top:8px">${esc(s.cv_text)}</p>` : ''}
+      ${s.cv_path ? `<button class="btn ghost" style="margin-top:14px" onclick="openCv('${esc(s.cv_path)}')">${ic('file', 18)} Ouvrir le CV en PDF</button>` : ''}</div>` : ''}`;
+}
+async function openCv(path) {
+  const w = window.open('', '_blank');
+  const { data, error } = await sb.storage.from('cvs').createSignedUrl(path, 3600);
+  if (error) { if (w) w.close(); return toast('CV indisponible'); }
+  if (w) w.location = data.signedUrl; else location.href = data.signedUrl;
+}
+
+/* ---------- messagerie ---------- */
+async function chatWith(sellerId, call) {
+  const id = S.me.id;
+  let { data: c } = await sb.from('conversations').select('*').eq('client_id', id).eq('seller_id', sellerId).maybeSingle();
+  if (!c) {
+    const r = await sb.from('conversations').insert({ client_id: id, seller_id: sellerId }).select().single();
+    if (r.error) return toast('Impossible de démarrer la conversation');
+    c = r.data;
+  }
+  S.tab = 'msgs'; S.sel = null;
+  await openConv(c);
+  if (call) startCall();
+}
+async function viewConvs() {
+  $('#main').innerHTML = `<h1 style="margin-top:6px">Messages</h1><div class="list" id="cl"><div class="empty">Chargement…</div></div>`;
+  const { data: convs } = await sb.from('conversations').select('*').order('last_message_at', { ascending: false });
+  const client = S.me.role === 'client';
+  let names = {};
+  if (client && convs && convs.length) {
+    const { data: ps } = await sb.from('profiles').select('*').in('id', convs.map(c => c.seller_id));
+    (ps || []).forEach(p => names[p.id] = p);
+  }
+  S.convMap = {}; (convs || []).forEach(c => S.convMap[c.id] = { c, o: client ? names[c.seller_id] : null });
+  $('#cl').innerHTML = convs && convs.length ? convs.map(c => {
+    const o = client ? names[c.seller_id] : null;
+    return `<button class="card conv" onclick="openConvId('${c.id}')">${avatar(o, 48)}<div style="flex:1;min-width:0"><div style="font-weight:600">${o ? esc(o.full_name) : 'Client'}</div>${o ? badge(o.role) : ''}</div><span class="sub" style="font-size:12px">${fmtTime(c.last_message_at)}</span></button>`;
+  }).join('') : `<div class="empty">${client ? 'Aucune conversation. Ouvrez un profil pour écrire à un prof ou une nounou.' : 'Aucune conversation. Un client doit vous écrire en premier.'}</div>`;
+}
+function openConvId(id) { const x = S.convMap[id]; S.other = x.o; openConv(x.c, x.o); }
+async function openConv(c, other) {
+  leaveChat();
+  S.conv = c;
+  if (S.me.role === 'client') {
+    S.other = other || (await sb.from('profiles').select('*').eq('id', c.seller_id).maybeSingle()).data;
+  } else S.other = null;
+  const { data } = await sb.from('messages').select('*').eq('conversation_id', c.id).order('created_at');
+  S.msgs = data || [];
+  S.channel = sb.channel('m-' + c.id).on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `conversation_id=eq.${c.id}` }, p => addMsg(p.new)).subscribe();
+  render();
+  scrollDown();
+}
+function leaveChat() { cancelRec(); if (S.channel) { sb.removeChannel(S.channel); S.channel = null; } S.conv = null; S.msgs = []; }
+function bubble(m) {
+  const mine = m.sender_id === S.me.id;
+  if (m.kind === 'video') return `<div class="b call ${mine ? 'me' : ''}"><span style="display:flex;gap:8px;align-items:center">${ic('video', 18)} Appel vidéo</span><button class="btn" onclick="joinCall('${esc(m.content)}')">Rejoindre</button><small>${fmtTime(m.created_at)}</small></div>`;
+  if (m.kind === 'image') return `<div class="b mediab ${mine ? 'me' : ''}"><img class="media" data-path="${esc(m.content)}" alt="Image" onclick="if(this.src)window.open(this.src,'_blank')"><small>${fmtTime(m.created_at)}</small></div>`;
+  if (m.kind === 'clip') return `<div class="b mediab ${mine ? 'me' : ''}"><video class="media" data-path="${esc(m.content)}" controls playsinline preload="metadata"></video><small>${fmtTime(m.created_at)}</small></div>`;
+  if (m.kind === 'audio') return `<div class="b mediab ${mine ? 'me' : ''}"><audio data-path="${esc(m.content)}" controls preload="metadata"></audio><small>${fmtTime(m.created_at)}</small></div>`;
+  return `<div class="b ${mine ? 'me' : ''}">${esc(m.content)}<small>${fmtTime(m.created_at)}</small></div>`;
+}
+function viewChat() {
+  const o = S.other;
+  $('#main').innerHTML = `
+    <div class="chathead">
+      <button class="icobtn" onclick="leaveChat();render()" aria-label="Retour">${ic('back')}</button>
+      ${avatar(o, 38)}<div class="t">${o ? esc(o.full_name) : 'Client'}</div>
+      <button class="icobtn" onclick="startCall()" aria-label="Appel vidéo">${ic('video')}</button>
+    </div>
+    <div class="msgs" id="msgs">${S.msgs.map(bubble).join('')}</div>
+    <div class="composer">
+      <div class="crow" id="cnorm">
+        <button class="icobtn" onclick="$('#mf').click()" aria-label="Joindre une photo, une vidéo ou un audio">${ic('clip')}</button>
+        <input id="mf" type="file" accept="image/*,video/*,audio/*" hidden onchange="pickFile(this)">
+        <input id="mi" placeholder="Votre message" autocomplete="off" onkeydown="if(event.key==='Enter')sendMsg()">
+        <button class="icobtn" onclick="startRec()" aria-label="Message vocal">${ic('mic')}</button>
+        <button class="send" onclick="sendMsg()" aria-label="Envoyer">${ic('send', 20)}</button>
+      </div>
+      <div class="crow" id="crec" hidden>
+        <span class="dot"></span><span id="rt" style="font-weight:600">0:00</span><span style="flex:1" class="sub">Enregistrement…</span>
+        <button class="btn ghost" style="padding:10px 14px" onclick="cancelRec()">Annuler</button>
+        <button class="send" onclick="stopRec(true)" aria-label="Envoyer le vocal">${ic('send', 20)}</button>
+      </div>
+    </div>`;
+  hydrate();
+}
+function addMsg(m) {
+  if (S.msgs.some(x => x.id === m.id)) return;
+  S.msgs.push(m);
+  const box = $('#msgs'); if (box) { box.insertAdjacentHTML('beforeend', bubble(m)); hydrate(); scrollDown(); }
+}
+function scrollDown() { const b = $('#msgs'); if (b) b.scrollTop = b.scrollHeight; }
+async function sendMsg() {
+  const i = $('#mi'), t = i.value.trim(); if (!t) return;
+  i.value = '';
+  const { data, error } = await sb.from('messages').insert({ conversation_id: S.conv.id, sender_id: S.me.id, kind: 'text', content: t }).select().single();
+  if (error) { i.value = t; return toast("Message non envoyé"); }
+  addMsg(data);
+}
+function roomName() { return 'ProfNounou-' + S.conv.id.replace(/-/g, ''); }
+async function startCall() {
+  const room = roomName();
+  window.open('https://meet.jit.si/' + room, '_blank', 'noopener');
+  const { data, error } = await sb.from('messages').insert({ conversation_id: S.conv.id, sender_id: S.me.id, kind: 'video', content: room }).select().single();
+  if (!error) addMsg(data);
+}
+const URLS = {};
+async function mediaUrl(path) {
+  if (!URLS[path]) { const { data } = await sb.storage.from('chat').createSignedUrl(path, 3600); if (data) URLS[path] = data.signedUrl; }
+  return URLS[path];
+}
+function hydrate() {
+  document.querySelectorAll('[data-path]:not([data-ok])').forEach(async el => {
+    el.dataset.ok = '1';
+    const u = await mediaUrl(el.dataset.path);
+    if (u) el.src = u; else el.outerHTML = '<span class="sub">Média indisponible</span>';
+  });
+}
+async function pickFile(inp) { const f = inp.files[0]; inp.value = ''; if (f) await sendMedia(f); }
+async function sendMedia(f, forced) {
+  const t = f.type || '';
+  const kind = forced || (t.startsWith('image/') ? 'image' : t.startsWith('video/') ? 'clip' : t.startsWith('audio/') ? 'audio' : null);
+  if (!kind) return toast('Format non pris en charge');
+  if (f.size > 50 * 1024 * 1024) return toast('Fichier trop lourd (50 Mo maximum)');
+  if (!S.conv) return;
+  toast('Envoi en cours…');
+  const ext = (f.name && f.name.includes('.') ? f.name.split('.').pop() : (t.split('/')[1] || 'bin')).toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 5) || 'bin';
+  const path = `${S.conv.id}/${S.me.id}-${Date.now()}.${ext}`;
+  const up = await sb.storage.from('chat').upload(path, f, { contentType: t || undefined });
+  if (up.error) return toast('Envoi impossible : ' + up.error.message);
+  const { data, error } = await sb.from('messages').insert({ conversation_id: S.conv.id, sender_id: S.me.id, kind, content: path }).select().single();
+  if (error) return toast('Message non envoyé');
+  addMsg(data);
+}
+async function startRec() {
+  if (S.rec) return;
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !window.MediaRecorder) return toast("Enregistrement non pris en charge sur cet appareil");
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const mime = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/ogg'].find(m => MediaRecorder.isTypeSupported(m));
+    const mr = new MediaRecorder(stream, mime ? { mimeType: mime } : undefined);
+    const R = { mr, stream, chunks: [], t0: Date.now(), cancel: false };
+    mr.ondataavailable = e => { if (e.data.size) R.chunks.push(e.data); };
+    mr.onstop = async () => {
+      stream.getTracks().forEach(t => t.stop()); clearInterval(R.timer);
+      if (S.rec === R) S.rec = null;
+      showRec(false);
+      if (R.cancel || !R.chunks.length) return;
+      const type = (mr.mimeType || 'audio/webm').split(';')[0];
+      await sendMedia(new Blob(R.chunks, { type }), 'audio');
+    };
+    R.timer = setInterval(() => {
+      const s = Math.floor((Date.now() - R.t0) / 1000), el = $('#rt');
+      if (el) el.textContent = Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+      if (s >= 300) stopRec(true);
+    }, 500);
+    S.rec = R; mr.start(); showRec(true);
+  } catch (e) { toast('Autorisez le micro pour envoyer un vocal'); }
+}
+function stopRec(send) { const R = S.rec; if (!R) return; R.cancel = !send; if (R.mr.state !== 'inactive') R.mr.stop(); }
+function cancelRec() { stopRec(false); }
+function showRec(on) {
+  const a = $('#cnorm'), b = $('#crec'); if (a) a.hidden = on; if (b) b.hidden = !on;
+  const t = $('#rt'); if (t) t.textContent = '0:00';
+}
+function joinCall(room) { window.open('https://meet.jit.si/' + room, '_blank', 'noopener'); }
+
+/* ---------- profil ---------- */
+function viewMe() {
+  const m = S.me;
+  $('#main').innerHTML = `
+    <div class="prof-head">${avatar(m, 96)}<h1>${esc(m.full_name)}</h1>${badge(m.role)}
+      <div class="meta">${ic('pin', 16)}${esc(m.city)}, ${esc(m.country)}</div></div>
+    <p class="sub" style="text-align:center">${m.role === 'client' ? 'Votre profil reste privé : seuls les vendeurs que vous contactez voient votre nom comme « Client ».' : 'Votre profil est visible uniquement par les clients.'}</p>
+    <div class="card" style="margin-top:16px"><h2>Modifier mon profil</h2>
+      <label for="en">Nom complet</label><input id="en" value="${esc(m.full_name)}">
+      <div class="row2"><div><label for="ec">Pays</label><select id="ec">${countryOptions(m.country)}</select></div><div><label for="ev">Ville</label><input id="ev" value="${esc(m.city)}"></div></div>
+      ${m.role === 'prof' ? `<label for="es">Matière enseignée</label><input id="es" value="${esc(m.subject)}">` : ''}
+      ${m.role === 'nounou' ? `<label for="eq">Qualités</label><input id="eq" value="${esc(m.qualities)}">` : ''}
+      ${m.role === 'prof' ? `<label for="ecv">CV détaillé</label><textarea id="ecv">${esc(m.cv_text)}</textarea>
+      <label for="ecf">Nouveau CV en PDF (facultatif)</label><input id="ecf" type="file" accept="application/pdf">` : ''}
+      <label for="eph">Nouvelle photo (facultatif)</label><input id="eph" type="file" accept="image/*">
+      <div id="msg"></div>
+      <button class="btn full" style="margin-top:18px" id="eb" onclick="saveMe()">Enregistrer</button></div>
+    <button class="btn ghost full" style="margin-top:14px" onclick="logout()">${ic('out', 18)} Se déconnecter</button>`;
+}
+async function saveMe() {
+  const m = S.me, btn = $('#eb'), msg = $('#msg'); btn.disabled = true; msg.innerHTML = '';
+  const v = id => ($('#' + id)?.value || '').trim();
+  const fail = t => { msg.innerHTML = `<div class="err">${esc(t)}</div>`; btn.disabled = false; };
+  if (!v('en') || !v('ec') || !v('ev')) return fail('Nom, pays et ville sont obligatoires.');
+  if (m.role === 'prof' && v('ecv').length < 80) return fail('Détaillez davantage votre CV (80 caractères minimum).');
+  try {
+    const upd = { full_name: v('en'), country: v('ec'), city: v('ev') };
+    if (m.role === 'prof') upd.cv_text = v('ecv');
+    if (m.role === 'prof') upd.subject = v('es');
+    if (m.role === 'nounou') upd.qualities = v('eq');
+    const ph = $('#eph').files[0], cf = $('#ecf') ? $('#ecf').files[0] : null;
+    if (ph) { if (ph.size > 5 * 1024 * 1024) return fail('La photo ne doit pas dépasser 5 Mo.'); upd.photo_url = sb.storage.from('avatars').getPublicUrl(await upload('avatars', ph, m.id, extOf(ph))).data.publicUrl; }
+    if (cf) upd.cv_path = await upload('cvs', cf, m.id, 'pdf');
+    const { data, error } = await sb.from('profiles').update(upd).eq('id', m.id).select().single();
+    if (error) throw error;
+    S.me = data; render(); toast('Profil enregistré');
+  } catch (e) { fail('Enregistrement impossible : ' + (e.message || 'erreur')); }
+}
+
+init();
+</script>
+</body>
+</html>
